@@ -6,6 +6,7 @@ using DG.Tweening;
 public class NewMain : MonoBehaviour
 {
     public GameObject[] prefabs;
+    public GameObject[] effects;
     public GameObject[,] objects;
     public int Column;
     public int Row;
@@ -107,13 +108,26 @@ public class NewMain : MonoBehaviour
 
     void PlayDestory()
     {
-        for(int i=0;i<cache.Count;i++)
+        float sx = Column * -0.5f * Size + 0.5f * Size;
+        float sy = Row * -0.5f * Size + 0.5f * Size;
+        for (int i=0;i<cache.Count;i++)
         {
             Mark mark = cache[i].GetComponent<Mark>();
             objects[mark.Column, mark.Row] = null;
+            GameObject go = GameObject.Instantiate(effects[mark.Index]);
+            go.transform.SetParent(transform);
+            go.transform.position = new Vector3(mark.Column * Size + sx, mark.Row * Size + sy, 0);
+            go.transform.localScale = new Vector3(Size, Size, Size);
             GameObject.Destroy(cache[i]);
+            //Debug.Log($"{nameof(NewMain)}: 要生成的动画是{go},他的父对象是{transform},他的位置是{go.transform.position}");
         }
-        Fall();
+        StartCoroutine(Wait(0.6f, Fall));
+    }
+
+    IEnumerator Wait(float time,System.Action action)
+    {
+        yield return new WaitForSeconds(time);
+        action();
     }
 
     void Fall()
@@ -190,7 +204,7 @@ public class NewMain : MonoBehaviour
                 SwapTest();
             }
         }
-        else if(ox==1)
+        else if(ox==0)
         {
             if(oy==1||oy==-1)
             {
